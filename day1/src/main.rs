@@ -1,4 +1,6 @@
-use std::fs;
+use std::{cmp::Reverse, fs};
+
+use itertools::Itertools;
 
 #[derive(Clone, Copy)]
 struct Elf {
@@ -60,21 +62,16 @@ fn solution() {
     println!("TOTAL_CALORIES: {}", total)
 }
 
-fn faster_than_lime() -> color_eyre::Result<()> {
-    color_eyre::install()?; // error report handler
-
-    let lines = include_str!("input.txt")
-        .lines()
-        .map(|v| v.parse::<u64>().ok())
-        .collect::<Vec<_>>();
-
-    let max = lines
-        .split(|line| line.is_none())
-        .map(|group| group.iter().map(|v| v.unwrap()).sum::<u64>())
-        .max();
-
-    println!("{max:?}");
-    Ok(())
+fn faster_than_lime() {
+    let answer = include_str!("input.txt") // read from file
+        .lines() // Break into lines
+        .map(|v| v.parse::<u64>().ok()) // while iterating, parse line as u64 and .ok() to change result into an option
+        .batching(|mut it| (&mut it).map_while(|x| x).sum1::<u64>())
+        .map(Reverse)
+        .k_smallest(3)
+        .map(|x| x.0)
+        .sum::<u64>();
+    println!("{answer:?}");
 }
 
 fn main() {
